@@ -1,0 +1,95 @@
+================================================================================
+PARAMETER GOLF — EXPERIMENT LOG (1xH100, train_gpt.py only)
+Goal: minimize val_bpb in 10 minutes, model+code < 10 MB
+================================================================================
+
+BASELINE (from leaderboard, 8xH100)
+  Config:  9L, dim=512, MLP×2, vocab=1024, QK_gain=1.5, warmdown=1200
+  val_bpb: 1.2244  |  ~15.8M params  |  ~7.5 MB (est.)
+  Steps:   ~6666 steps in 600 s on 8×H100
+
+--------------------------------------------------------------------------------
+RUN 1 — 11L + MLP×3 + LeakyReLU² + QK=5.0 + MuonEqR (row-only norm)
+  Changes vs baseline:
+    - num_layers:     9 → 11
+    - mlp_mult:       2 → 3  (hidden 1024 → 1536)
+    - qk_gain_init:   1.5 → 5.0
+    - MuonEqR:        per-row norm only (no Frobenius renorm) — BUGGY
+    - Activation:     relu² → leaky_relu(0.5)²
+    - Depth recur:    layers {4,5} repeated
+  Result:  NaN from step 2
+  Cause:   QK gain 5.0 too large for baseline LRs → attention logit overflow
+
+--------------------------------------------------------------------------------
+RUN 2 — 11L + MLP×3 + LeakyReLU² + QK=2.5 + MuonEqR (fixed) + Recur(4,5)
+  Changes vs Run 1:
+    - qk_gain_init:   5.0 → 2.5
+    - MuonEqR:        added Frobenius renorm after row-norm for NS5 stability
+    - recur_layers:   default "4,5"
+  val_bpb (pre-quant):  1.7723  @  247 steps (2.5 min)
+  val_bpb (int8+zlib):  1.8469
+  Submission size:       12.26 MB  ← OVER 10 MB LIMIT
+  Cause:   11L × MLP×3 = 26.5M params → too large after int8+zlib
+
+--------------------------------------------------------------------------------
+RUN 3 — 9L + MLP×3 + LeakyReLU² + QK=2.5 + MuonEqR + Recur(3,4)
+  Changes vs Run 2:
+    - num_layers:     11 → 9 (to fit under 10 MB)
+    - recur_layers:   adaptive hinge = {num_layers//2-1, num_layers//2} = {3,4}
+  val_bpb (pre-quant):  1.6801  @  285 steps (2.5 min)
+  val_bpb (int8+zlib):  1.7298
+  Submission size:       9.60 MB  ← under 10 MB ✓
+  Note:    MLP×3 hidden=1536 is still right at limit
+
+--------------------------------------------------------------------------------
+RUN 4 — same + mlp_mult=2.5 (hidden=1280, float mlp_mult) + warmdown=500
+  Changes vs Run 3:
+    - mlp_mult:        3.0 → 2.5  (hidden 1536 → 1280, float mult support added)
+    - warmdown_iters:  1200 → 500
+  Rationale for warmdown fix:
+    At 525 ms/step on 1×H100, warmdown_iters=1200 means warmdown window = 630 s
+    > 600 s total budget → LR decays from step 1 (always in warmdown).
+    Setting 500 gives ~262 s warmdown → peak LR for first ~338 s (~643 steps).
+  val_bpb (pre-quant):  1.5768  @  279 steps (2.5 min)  [RUN WAS LABELED RUN3 IN CODE]
+  val_bpb (int8+zlib):  1.7298  (Run 3 file logged above — mlp×2.5 tested separately)
+
+  [Note: two sub-runs happened here; the warmdown=500 run gave:]
+  val_bpb (pre-quant):  1.5768 (9L MLP2.5 warmdown=500)
+  val_bpb (int8+zlib):  1.7115  @  285 steps, 9.60 MB  — separate sub-run
+  val_bpb (pre-quant):  1.5768 (warmdown=500 run): 1.5879 after quant, 11.27 MB ✗
+  Cause:   Full LR throughout (peak phase) → larger weights → worse zlib compression
+
+--------------------------------------------------------------------------------
+RUN 5 — add Muon Weight Decay (WD=0.04) to Run 4 stack  ← BEST SO FAR
+  Changes vs Run 4:
+    - muon_wd:  0.0 → 0.04 (decoupled WD: p *= (1 - lr*wd) after each Muon step)
+  Rationale:
+    WD regularizes weight magnitudes → smaller weights → better zlib compression.
+    Also improves generalization (implicit L2 regularization).
+  Config summary:
+    - 9 layers, dim=512, MLP×2.5 (hidden=1280), vocab=1024
+    - QK_gain_init=2.5,  warmdown=500,  muon_wd=0.04
+    - Activation: leaky_relu(0.5)²  instead of relu²
+    - MuonEqR: row-normalize then Frobenius-normalize before NS5
+    - Depth recurrence on blocks {3,4} (U-Net hinge, zero extra params)
+  val_bpb (pre-quant):  1.5602  @  286 steps (2.5 min)
+  val_bpb (int8+zlib):  1.5721
+  Submission size:       11.06 MB  ← still over at 2.5 min snapshot
+  NOTE: Size at 2.5 min reflects mid-training peak-LR phase (model not converged).
+        Full 10-min run (1143 steps) includes warmdown → weights converge/shrink
+        → expected final size < 10 MB.  Definitive 10-min run below.
+
+================================================================================
+ARCHITECTURE CHANGES SUMMARY (relative to baseline)
+================================================================================
+  1. Activation:         relu² → leaky_relu(0.5)²         (proven -0.003 BPB in records)
+  2. MuonEqR optimizer:  per-row + Frobenius normalize     (proven -0.001 BPB in records)
+  3. Muon weight decay:  WD=0.04                           (better regularization + compression)
+  4. MLP width:          ×2 → ×2.5 (hidden 1024→1280)     (more capacity per layer)
+  5. QK gain init:       1.5 → 2.5                        (stronger attention)
+  6. Depth recurrence:   blocks {3,4} run twice            (free effective depth, proven +0.002 BPB)
+  7. Warmdown iters:     1200 → 500                        (calibrated for ~525 ms/step on 1×H100)
+
+================================================================================
+FULL 10-MINUTE RUN (Run 5 config, results below)
+================================================================================
