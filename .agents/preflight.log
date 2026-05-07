@@ -1,0 +1,51 @@
+logs/preflight.txt
+val_bpb:enabled tokenizer_kind=sentencepiece tokenizer_path=/root/parameter-golf/data/tokenizers/fineweb_1024_bpe.model
+train_loader:dataset:fineweb10B_sp1024 train_shards:10
+val_loader:shards pattern=/root/parameter-golf/data/datasets/fineweb10B_sp1024/fineweb_val_*.bin tokens:62021632
+model_params:17059912
+world_size:1 grad_accum_steps:8
+sdp_backends:cudnn=False flash=True mem_efficient=False math=False
+attention_mode:gqa num_heads:8 num_kv_heads:4
+tie_embeddings:True embed_lr:0.05 head_lr:0.0 matrix_lr:0.04 scalar_lr:0.04
+train_batch_tokens:524288 train_seq_len:1024 iterations:20000 warmup_steps:20 max_wallclock_seconds:30.000
+seed:1337
+warmup_step:1/20
+warmup_step:2/20
+warmup_step:3/20
+warmup_step:4/20
+warmup_step:5/20
+warmup_step:6/20
+warmup_step:7/20
+warmup_step:8/20
+warmup_step:9/20
+warmup_step:10/20
+warmup_step:11/20
+warmup_step:12/20
+warmup_step:13/20
+warmup_step:14/20
+warmup_step:15/20
+warmup_step:16/20
+warmup_step:17/20
+warmup_step:18/20
+warmup_step:19/20
+warmup_step:20/20
+step:1/20000 train_loss:6.9357 train_time:455ms step_avg:455.45ms
+step:2/20000 train_loss:16.7413 train_time:885ms step_avg:442.27ms
+step:3/20000 train_loss:16.1360 train_time:1331ms step_avg:443.80ms
+step:4/20000 train_loss:15.3375 train_time:1769ms step_avg:442.18ms
+step:5/20000 train_loss:14.5484 train_time:2218ms step_avg:443.61ms
+step:6/20000 train_loss:13.6330 train_time:2629ms step_avg:438.11ms
+step:7/20000 train_loss:12.8151 train_time:3033ms step_avg:433.23ms
+step:8/20000 train_loss:12.0227 train_time:3444ms step_avg:430.56ms
+step:9/20000 train_loss:11.2313 train_time:3877ms step_avg:430.75ms
+step:10/20000 train_loss:10.4699 train_time:4351ms step_avg:435.12ms
+step:61/20000 val_loss:5.4853 val_bpb:3.2487 train_time:30466ms step_avg:499.44ms
+stopping_early: wallclock_cap train_time:30466ms step:61/20000
+peak memory allocated: 10303 MiB reserved: 10622 MiB
+Serialized model: 67224983 bytes
+Code size: 47686 bytes
+Total submission size: 67272669 bytes
+Serialized model int8+zlib: 5319805 bytes (payload:17178912 raw_torch:17224025 payload_ratio:3.91x)
+Total submission size int8+zlib: 5367491 bytes
+final_int8_zlib_roundtrip val_loss:5.5130 val_bpb:3.2651 eval_time:10791ms
+final_int8_zlib_roundtrip_exact val_loss:5.51297260 val_bpb:3.26509290
