@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-dual-agent-research.py  —  parameter-golf edition
+dual-research-agent.py  —  parameter-golf edition
 
 Pipelined flow so thinking never waits for GPU and GPU never waits for thinking:
 
@@ -21,7 +21,7 @@ Branches created:
   synthesis  merged result + RUN_LOG.md
 
 Usage:
-  python dual-agent-research.py [options]
+  python dual-research-agent.py [options]
 
 Options:
   --nproc     GPUs for torchrun            (default: 1)
