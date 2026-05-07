@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-dual-agent-research.py
+dual_agent_research.py
 
 Two Claude agents edit the same file in parallel on separate git branches,
 then meet in a structured discussion before a synthesis agent merges their work.
@@ -13,7 +13,7 @@ Flow:
   QA         → runs tests, writes report.md
 
 Usage:
-    python dual-agent-research.py --file <path> --task "<description>" [options]
+    python dual_agent_research.py --file <path> --task "<description>" [options]
 
 Options:
     --m1, --metric1     Agent 1 metric      (default: "Performance & Speed")
@@ -343,14 +343,14 @@ async def run_discussion(
 # ── Main ──────────────────────────────────────────────────────────────────────
 async def main():
     parser = argparse.ArgumentParser(
-        prog="dual-agent-research",
+        prog="dual_agent_research",
         description="Two Claude agents edit a file in parallel on separate git branches, then discuss.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 examples:
-  python dual-agent-research.py --file src/sort.py --task "implement quicksort"
+  python dual_agent_research.py --file src/sort.py --task "implement quicksort"
 
-  python dual-agent-research.py \\
+  python dual_agent_research.py \\
     --file api/cache.py \\
     --task "build an LRU cache" \\
     --m1 "Performance & Speed" \\
