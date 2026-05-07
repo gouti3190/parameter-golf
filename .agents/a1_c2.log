@@ -1,0 +1,50 @@
+logs/a1_c2.txt
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/root/parameter-golf-1/.agents/worktree-1/train_gpt.py", line 1171, in <module>
+[rank0]:     main()
+[rank0]:   File "/root/parameter-golf-1/.agents/worktree-1/train_gpt.py", line 847, in main
+[rank0]:     sp = spm.SentencePieceProcessor(model_file=args.tokenizer_path)
+[rank0]:          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.11/dist-packages/sentencepiece/__init__.py", line 468, in Init
+[rank0]:     self.Load(model_file=model_file, model_proto=model_proto)
+[rank0]:   File "/usr/local/lib/python3.11/dist-packages/sentencepiece/__init__.py", line 961, in Load
+[rank0]:     return self.LoadFromFile(model_file)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/usr/local/lib/python3.11/dist-packages/sentencepiece/__init__.py", line 316, in LoadFromFile
+[rank0]:     return _sentencepiece.SentencePieceProcessor_LoadFromFile(self, arg)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]: OSError: Not found: "./data/tokenizers/fineweb_1024_bpe.model": No such file or directory Error #2
+[rank0]:[W507 06:46:51.036894662 ProcessGroupNCCL.cpp:1575] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+E0507 06:46:52.509000 7844 torch/distributed/elastic/multiprocessing/api.py:986] failed (exitcode: 1) local_rank: 0 (pid: 7924) of binary: /usr/bin/python
+Traceback (most recent call last):
+  File "/usr/local/bin/torchrun", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/run.py", line 990, in main
+    run(args)
+  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/run.py", line 981, in run
+    elastic_launch(
+  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/launcher/api.py", line 170, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/launcher/api.py", line 317, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+train_gpt.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-05-07_06:46:52
+  host      : 5f85086729e3
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 7924)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
