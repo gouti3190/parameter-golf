@@ -199,7 +199,7 @@ def make_synthesis_system(a1_focus: str, a2_focus: str, n_turns: int) -> str:
 async def stream_agent(client, system, messages, on_token) -> str:
     full = ""
     async with client.messages.stream(
-        model="claude-sonnet-4-20250514", max_tokens=4000,
+        model="claude-sonnet-4-5", max_tokens=4000,
         system=system, messages=messages,
     ) as s:
         async for text in s.text_stream:
@@ -244,7 +244,7 @@ async def run_parallel_coding(client, a1_cfg, a2_cfg, timer_secs):
 async def stream_one(client, system, messages, max_tokens=4000) -> str:
     full = ""
     async with client.messages.stream(
-        model="claude-sonnet-4-20250514", max_tokens=max_tokens,
+        model="claude-sonnet-4-5", max_tokens=max_tokens,
         system=system, messages=messages,
     ) as s:
         async for text in s.text_stream:
@@ -363,7 +363,7 @@ async def main():
     print(f"""
 {bold(CYAN)}╔══════════════════════════════════════════════════════════════╗{R}
 {bold(CYAN)}║{R}  {bold(CYAN)}Dual Agent Research  ·  parameter-golf edition{R}              {bold(CYAN)}║{R}
-{bold(CYAN)}║{R}  {dim("claude-sonnet-4-20250514  ·  target: train_gpt.py")}         {bold(CYAN)}║{R}
+{bold(CYAN)}║{R}  {dim("claude-sonnet-4-5  ·  target: train_gpt.py")}         {bold(CYAN)}║{R}
 {bold(CYAN)}╚══════════════════════════════════════════════════════════════╝{R}
   {dim("target:")}      {bold(TARGET_FILE)}  (only file agents touch)
   {dim("metric:")}      {bold("val_bpb")}  (lower is better · 16MB model limit)
